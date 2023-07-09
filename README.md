@@ -5,6 +5,8 @@
 
 그렇기에, 기본적인 딥러닝 프레임워크 Pytorch, 자연어처리 PLM을 쉽게 사용할 수 있는 huggingface와 시각화를 위한 WandB를 사용하였고, V100이 주어지는 서버를 vscode를 SSH로 받아와 팀 전용 github와 연동하여 협업하였다.
 
+<br>
+
 # 2. 프로젝트 팀 구성 및 역할
 - 변성훈(팀장) : 노션 자료 정리, EDA, 데이터 시각화, 모델별 output 분포 정리 및 분석
 - 김지현 : label error correction 자료조사, R-drop, special token adding 가설 구현, ensemble 구현 및 실험
@@ -12,7 +14,11 @@
 - 이상민 : 데이터 분포 고려 데이터 증강 실험, check_point, padding_cutting
 - 천재원 : 라벨 페널티, 스페셜 토큰 사용 아이디에이션 및 구현 / Rdrop, Sentence swap 구현 및 wandb 세팅 / 데이터 증강 아이디에이션
 
+<br>
+
 # 3. 프로젝트 수행 절차 및 방법
+
+<br>
 
 ## 1) model 선정
 
@@ -26,10 +32,14 @@
 
 ![image](https://user-images.githubusercontent.com/126854237/234342782-863f3dd5-3005-49f6-b232-93ab500bff5b.png)
 
+<br>
+
 ## 2) baseline code 수정
 - Early Stopping : 3번 연속 validation pearson score가 하락한다면, stop 하는 기능
 - Attention mask : baseline code는 input id만 사용하고 attention mask를 model에 넣어주지 않음을 확인. > attention mask도 추가
 - Wandb setting : project name은 사용 모델 이름, run name은 hyperparameter와 같은 특징을 사용해서 기록
+
+<br>
 
 ## 3) EDA
 dev.csv는 모든 label이 비교적 uniform
@@ -52,6 +62,8 @@ Label 5의 샘플들은 모두 공통적으로 sentence 2의 문장이 sentence 
 
 또한 아래에서 언급될 special token 을 사용하기 위해 5.0 증강된 데이터이 source는 본래의 source를 그대로 가져오고 0에서의 sampled는 rtt로 바꾸어 주었다. 
 
+<br>
+
 ## 4) 가설 구현
 - Label Penalty
   - 주어진 train.csv는 label 0.0이 전체의 20%를 차지함. 모델이 아예 학습을 하지 않고 0.0으로만 예측해도 Pearson 0.2를 넘길 수 있을 정도.
@@ -72,12 +84,15 @@ Label 5의 샘플들은 모두 공통적으로 sentence 2의 문장이 sentence 
     - 5개의 special token을 각각 1차원으로 projection하여 5개의 후보 logits를 생성
     - 학습 가능한 5개의 weights로 logits를 weighted sum하여 최종 logit 생성
 
+<br>
+
 ## 5) ensemble
 ### weighted average ensemble
 - Ensemble 에 사용할 모델들의 실제 submit score 를 weight 로 사용하여 ensemble 모델의 예측 정확도를 높이려 노력
 - 해당 score 들은 softmax를 통과하여 각 logit 과 곱해진 후 합해지는 weighted sum 의 형태
 - 실험 결과 logit 들의 분포가 다를 경우(각 모델의 상관 관계가 낮을 경우) 성능 향상의 폭이 더 컸음
-<br><br>
+
+<br>
 
 ### 실험 결과
 - 각 모델의 상관 관계가 낮을 수록 성능 향상의 폭이 크다.
@@ -99,7 +114,9 @@ Label 5의 샘플들은 모두 공통적으로 sentence 2의 문장이 sentence 
   |klue/roberta-large|0.8999|
 
   `평균 제출 score 가 더 높음에도 불구하고, roberta-large 를 함께 앙상블한 결과가 더 높은 score 를 가진다.`
-  
+
+<br>
+
 - 다양한 target 분포를 가진 모델을 앙상블 하면 성능이 높아진다.
    
    3. submit score: 0.9324 (+0.0024)
@@ -114,7 +131,9 @@ Label 5의 샘플들은 모두 공통적으로 sentence 2의 문장이 sentence 
   |kykim/electra-kor-base|0.9165|
 
   `Target 값의 분포를 기준으로 각 모델을 보완 해 줄 수 있는 모델을 앙상블 한 결과가 더 높은 score 를 가진다. `
-  
+
+<br>
+
 - 가장 높은 성능의 ensemble output
 
    4. submit score: 0.9352 (+0.0028) -> **최종 pearson : 0.9420**
@@ -127,9 +146,13 @@ Label 5의 샘플들은 모두 공통적으로 sentence 2의 문장이 sentence 
   |kykim/electra-kor-base|0.9187|
   |beomi/KcELECTRA-base|0.9221|
   |monologg/koelectra-base-discriminator|0.9185|
+
+<br>
   
 # 4. 프로젝트 수행 결과
+- public : 2위
+![image](https://github.com/DNA-B/NLP_Semantic-Text-Similarity/assets/102334596/e1cf49c5-79d1-4154-9b42-91bbdce894a3)
 
-![image](https://user-images.githubusercontent.com/126854237/234345560-e7921bc6-d3ef-4ebd-ab24-d237b579ed33.png)
+- private : 1위
+![image](https://github.com/DNA-B/NLP_Semantic-Text-Similarity/assets/102334596/ff793424-f645-4187-815a-1238e344f8e3)
 
-- 최종 pearson : 0.9420
