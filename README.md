@@ -156,3 +156,4 @@ Label 5의 샘플들은 모두 공통적으로 sentence 2의 문장이 sentence 
 - private : 1위
 ![image](https://github.com/DNA-B/NLP_Semantic-Text-Similarity/assets/102334596/ff793424-f645-4187-815a-1238e344f8e3)
 
+최종 pearson : 0.9420
